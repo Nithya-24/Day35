@@ -3,6 +3,8 @@ package com;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Scanner;
+import com.EmployeePayrollException;
+import com.EmployeePayrollException.ExceptionType;
 
 public class EmpPayrollServiceDB {
 
@@ -19,6 +21,7 @@ public class EmpPayrollServiceDB {
 	}
 
 	public EmpPayrollServiceDB(List<EmployeePayrollData> employeePayrollList) {
+		this();
 		this.employeePayrollList = employeePayrollList;
 	}
 
@@ -86,5 +89,36 @@ public class EmpPayrollServiceDB {
 			return new EmpPayrollService().readData();
 		else
 			return null;
+	}
+	public void updateEmployeeSalary(String name, double salary) throws EmployeePayrollException {
+		int result = ((EmpPayrollService) employeePayrollList).updateEmployeeData(name, salary);
+		EmployeePayrollData employeePayrollData = null;
+		if (result == 0)
+			throw new EmployeePayrollException(ExceptionType.UPDATE_FAIL, "Update Failed");
+		else
+			employeePayrollData = this.getEmployeePayrollData(name);
+		if (employeePayrollData != null) {
+			employeePayrollData.salary = salary;
+		}
+	}
+
+	/**
+	 * @param name
+	 * @return Employee corresponding to name
+	 */
+	private EmployeePayrollData getEmployeePayrollData(String name) {
+		EmployeePayrollData employeePayrollData = this.employeePayrollList.stream()
+				.filter(employee -> employee.name.equals(name)).findFirst().orElse(null);
+		return employeePayrollData;
+	}
+
+	/**
+	 * @param name
+	 * @return true if data is in sync
+	 */
+	public boolean checkEmployeePayrollInSyncWithDB(String name) {
+		List<EmployeePayrollData> checkList = (List<EmployeePayrollData>) ((EmpPayrollServiceDB) employeePayrollList).getEmployeePayrollData(name);
+		return checkList.get(0).equals(getEmployeePayrollData(name));
+
 	}
 }
