@@ -1,0 +1,3 @@
+id =1,name =Nithya R,salary =400000
+id =2,name =XYZ,salary =500000
+id =3,name =ABC,salary =600000
