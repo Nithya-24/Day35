@@ -8,6 +8,7 @@ import java.util.List;
 import com.EmpPayrollServiceDB;
 import com.EmpPayrollServiceDB.IOService;
 import com.EmployeePayrollData;
+import com.EmployeePayrollException;
 
 public class Emp_PayrollTest {
 
@@ -41,5 +42,20 @@ public class Emp_PayrollTest {
 		EmpPayrollServiceDB employeePayrollService = new EmpPayrollServiceDB();
 		List<EmployeePayrollData> employeePayrollData = employeePayrollService.readData(IOService.DB_IO);
 		assertEquals(3, employeePayrollData.size());
+	}
+	@Test
+	/**
+	 * To check whether the salary is updated in the database and is synced with the
+	 * DB
+	 * 
+	 * @throws EmployeePayrollException
+	 */
+	public void givenNewSalaryForEmployee_WhenUpdated_ShouldSyncWithDatabase() throws EmployeePayrollException {
+		EmpPayrollServiceDB employeePayrollService = new EmpPayrollServiceDB();
+		List<EmployeePayrollData> employeePayrollData = employeePayrollService.readData(IOService.DB_IO);
+		employeePayrollService.updateEmployeeSalary("ABC", 3000000);
+		boolean result = employeePayrollService.checkEmployeePayrollInSyncWithDB("ABC");
+		assertTrue(result);
+		System.out.println(employeePayrollData);
 	}
 }
