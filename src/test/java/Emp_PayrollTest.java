@@ -3,25 +3,29 @@ import static org.junit.Assert.*;
 import java.util.Arrays;
 
 import org.junit.Test;
-import java.util.List;
 
-import com.EmpPayrollServiceDB;
-import com.EmpPayrollServiceDB.IOService;
+import com.EmpPayrollDBService.StatementType;
 import com.EmployeePayrollData;
 import com.EmployeePayrollException;
+import com.EmployeePayrollService;
+import com.EmployeePayrollService.IOService;
+
+import java.util.List;
+
+
 
 public class Emp_PayrollTest {
 
 	@Test
-	public void shouldAnswerWithTrue() {
-		assertTrue(true);
-	}
+	/**
+	 * created test method 
+	 */
 	public void given3Employees_WhenWrittenToFile_ShouldMatchEmployeeEntries() {
-		EmployeePayrollData[] arrayOfEmp = { new EmployeePayrollData(1, "Nithya R", 400000),
-				new EmployeePayrollData(2, "XYZ", 500000),
-				new EmployeePayrollData(3, "ABC", 600000) };
-		EmpPayrollServiceDB employeePayrollService;
-		employeePayrollService = new EmpPayrollServiceDB(Arrays.asList(arrayOfEmp));
+		EmployeePayrollData[] arrayOfEmp = { new EmployeePayrollData(1, "Jeff Bezos", 100000.0),
+				new EmployeePayrollData(2, "Bill Gates", 200000.0),
+				new EmployeePayrollData(3, "Mark Zuckerberg", 300000.0) };
+		EmployeePayrollService employeePayrollService;
+		employeePayrollService = new EmployeePayrollService(Arrays.asList(arrayOfEmp));
 		employeePayrollService.writeEmployeeData(IOService.FILE_IO);
 		long entries = employeePayrollService.countEntries(IOService.FILE_IO);
 		employeePayrollService.printData(IOService.FILE_IO);
@@ -32,29 +36,42 @@ public class Emp_PayrollTest {
 
 	@Test
 	/**
-	 * created test method to match the employeeCount
+	 * To check the count in database is matching in java program or not
 	 */
 	public void givenEmployeePayrollInDB_WhenRetrieved_ShouldMatchEmployeeCount() {
-
-		/**
-		 * Creating object for EmployeePayRollService Class
-		 */
-		EmpPayrollServiceDB employeePayrollService = new EmpPayrollServiceDB();
+		EmployeePayrollService employeePayrollService = new EmployeePayrollService();
 		List<EmployeePayrollData> employeePayrollData = employeePayrollService.readData(IOService.DB_IO);
-		assertEquals(3, employeePayrollData.size());
+		assertEquals(4, employeePayrollData.size());
 	}
+
 	@Test
 	/**
-	 * To check whether the salary is updated in the database and is synced with the
-	 * DB
+	 * To check whether the salary is updated in the database and is synced with the DB
 	 * 
 	 * @throws EmployeePayrollException
 	 */
 	public void givenNewSalaryForEmployee_WhenUpdated_ShouldSyncWithDatabase() throws EmployeePayrollException {
-		EmpPayrollServiceDB employeePayrollService = new EmpPayrollServiceDB();
+		EmployeePayrollService employeePayrollService = new EmployeePayrollService();
 		List<EmployeePayrollData> employeePayrollData = employeePayrollService.readData(IOService.DB_IO);
-		employeePayrollService.updateEmployeeSalary("ABC", 3000000);
-		boolean result = employeePayrollService.checkEmployeePayrollInSyncWithDB("ABC");
+		employeePayrollService.updateEmployeeSalary("Mark Zuckerberg", 3000000.00, StatementType.STATEMENT);
+		boolean result = employeePayrollService.checkEmployeePayrollInSyncWithDB("Mark Zuckerberg");
+		assertTrue(result);
+		System.out.println(employeePayrollData);
+	}
+
+	@Test
+	/**
+	 * To test whether the salary is updated in the database and is synced with the
+	 * DB using JDBC PreparedStatement
+	 * 
+	 * @throws EmployeePayrollException
+	 */
+	public void givenNewSalaryForEmployee_WhenUpdatedUsingPreparedStatement_ShouldSyncWithDatabase()
+			throws EmployeePayrollException {
+		EmployeePayrollService employeePayrollService = new EmployeePayrollService();
+		List<EmployeePayrollData> employeePayrollData = employeePayrollService.readData(IOService.DB_IO);
+		employeePayrollService.updateEmployeeSalary("Mark Zuckerberg", 3000000.00, StatementType.PREPARED_STATEMENT);
+		boolean result = employeePayrollService.checkEmployeePayrollInSyncWithDB("Mark Zuckerberg");
 		assertTrue(result);
 		System.out.println(employeePayrollData);
 	}

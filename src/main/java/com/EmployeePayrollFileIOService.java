@@ -7,9 +7,18 @@ import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 
-public class EmpFileIOService {
-	public static String PAYROLL_FILE_NAME = "src/main/java/com/payroll.txt";
+public class EmployeePayrollFileIOService {
+	
+	/**
+	 * payroll file name path is given
+	 */
+	public static String PAYROLL_FILE_NAME = "src/payroll-file.txt";
 
+	/**
+	 * created method writeData to write the data in the console
+	 * 
+	 * @param employeePayrollList
+	 */
 	public void writeData(List<EmployeePayrollData> employeePayrollList) {
 		StringBuffer empBuffer = new StringBuffer();
 		employeePayrollList.forEach(employee -> {
@@ -23,6 +32,9 @@ public class EmpFileIOService {
 		}
 	}
 
+	/**
+	 * method for printing the data
+	 */
 	public void printData() {
 		try {
 			Files.lines(new File(PAYROLL_FILE_NAME).toPath()).forEach(System.out::println);
@@ -50,20 +62,22 @@ public class EmpFileIOService {
 	public List<EmployeePayrollData> readData() {
 		List<EmployeePayrollData> employeePayrollList = new ArrayList<EmployeePayrollData>();
 		try {
-			Files.lines(new File(PAYROLL_FILE_NAME).toPath()).map(line -> line.trim()).forEach(line -> {
-				String data = line.toString();
-				String[] dataArr = data.split(",");
-				for (int i = 0; i < dataArr.length; i++) {
-					int id = Integer.parseInt(dataArr[i].replaceAll("id =", ""));
-					i++;
-					String name = dataArr[i].replaceAll("name =", "");
-					i++;
-					double salary = Double.parseDouble(dataArr[i].replaceAll("salary =", ""));
-					EmployeePayrollData employeePayrollData = new EmployeePayrollData(id, name, salary);
-					employeePayrollList.add(employeePayrollData);
-				}
+			Files.lines(new File(PAYROLL_FILE_NAME).toPath())
+			.map(line->line.trim())
+			.forEach(line->{
+			String data = line.toString();
+			String[] dataArr = data.split(",");
+			for(int i=0;i<dataArr.length;i++){
+				int id = Integer.parseInt(dataArr[i].replaceAll("id =", ""));
+				i++;
+				String name = dataArr[i].replaceAll("name =", "");
+				i++;
+				double salary = Double.parseDouble(dataArr[i].replaceAll("salary =", ""));
+				EmployeePayrollData employeePayrollData = new EmployeePayrollData(id,name,salary);
+				employeePayrollList.add(employeePayrollData);
+			}
 			});
-		} catch (IOException e) {
+		}catch(IOException e) {
 			e.printStackTrace();
 		}
 		return employeePayrollList;

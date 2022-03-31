@@ -1,7 +1,6 @@
 package com;
 
 public class EmployeePayrollException extends Exception {
-
 	public enum ExceptionType {
 		UPDATE_FAIL
 	}

@@ -3,7 +3,10 @@ package com;
 import java.time.LocalDate;
 
 public class EmployeePayrollData {
-
+	
+	/**
+	 * Declaring variables
+	 */
 	public int id;
 	public String name;
 	public double salary;

@@ -3,11 +3,13 @@ package com;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Scanner;
-import com.EmployeePayrollException;
+
+import com.EmpPayrollDBService.StatementType;
 import com.EmployeePayrollException.ExceptionType;
 
-public class EmpPayrollServiceDB {
 
+
+public class EmployeePayrollService {
 	public enum IOService {
 		CONSOLE_IO, FILE_IO, DB_IO, REST_IO
 	}
@@ -16,23 +18,20 @@ public class EmpPayrollServiceDB {
 	 * To get the list of employee payroll from the database
 	 */
 	public List<EmployeePayrollData> employeePayrollList;
+	private EmpPayrollDBService employeePayrollDBService;
 
-	public EmpPayrollServiceDB() {
+	public EmployeePayrollService() {
+		employeePayrollDBService = EmpPayrollDBService.getInstance();
 	}
 
-	public EmpPayrollServiceDB(List<EmployeePayrollData> employeePayrollList) {
+	public EmployeePayrollService(List<EmployeePayrollData> employeePayrollList) {
 		this();
 		this.employeePayrollList = employeePayrollList;
 	}
 
-	/**
-	 * Main method for manipulation of JDBC
-	 * 
-	 * @param args - Default Java param (Not used)
-	 */
 	public static void main(String[] args) {
 		List<EmployeePayrollData> employeePayrollList = new ArrayList<EmployeePayrollData>();
-		EmpPayrollServiceDB employeePayrollService = new EmpPayrollServiceDB(employeePayrollList);
+		EmployeePayrollService employeePayrollService = new EmployeePayrollService(employeePayrollList);
 		Scanner consoleInputReader = new Scanner(System.in);
 		employeePayrollService.readEmployeeData(consoleInputReader);
 		employeePayrollService.writeEmployeeData(IOService.CONSOLE_IO);
@@ -58,14 +57,14 @@ public class EmpPayrollServiceDB {
 		if (ioService.equals(IOService.CONSOLE_IO))
 			System.out.println("Writing Employee Payroll Data to Console\n" + employeePayrollList);
 		else if (ioService.equals(IOService.FILE_IO))
-			new EmpFileIOService().writeData(employeePayrollList);
+			new EmployeePayrollFileIOService().writeData(employeePayrollList);
 	}
 
 	/**
 	 * @param ioService Print Data
 	 */
 	public void printData(IOService ioService) {
-		new EmpFileIOService().printData();
+		new EmployeePayrollFileIOService().printData();
 	}
 
 	/**
@@ -74,7 +73,7 @@ public class EmpPayrollServiceDB {
 	 */
 	public long countEntries(IOService ioService) {
 		if (ioService.equals(IOService.FILE_IO))
-			return new EmpFileIOService().countEntries();
+			return new EmployeePayrollFileIOService().countEntries();
 		return 0;
 	}
 
@@ -84,14 +83,23 @@ public class EmpPayrollServiceDB {
 	 */
 	public List<EmployeePayrollData> readData(IOService ioService) {
 		if (ioService.equals(IOService.FILE_IO))
-			return new EmpFileIOService().readData();
-		else if (ioService.equals(IOService.DB_IO))
-			return new EmpPayrollService().readData();
-		else
+			return new EmployeePayrollFileIOService().readData();
+		else if (ioService.equals(IOService.DB_IO)) {
+			employeePayrollList = employeePayrollDBService.readData();
+			return employeePayrollList;
+		} else
 			return null;
 	}
-	public void updateEmployeeSalary(String name, double salary) throws EmployeePayrollException {
-		int result = ((EmpPayrollService) employeePayrollList).updateEmployeeData(name, salary);
+
+	/**
+	 * updating EmployeeSalary from the database
+	 * 
+	 * @param name
+	 * @param salary
+	 * @throws EmployeePayrollException
+	 */
+	public void updateEmployeeSalary(String name, double salary, StatementType type) throws EmployeePayrollException {
+		int result = employeePayrollDBService.updateEmployeeData(name, salary, type);
 		EmployeePayrollData employeePayrollData = null;
 		if (result == 0)
 			throw new EmployeePayrollException(ExceptionType.UPDATE_FAIL, "Update Failed");
@@ -103,6 +111,8 @@ public class EmpPayrollServiceDB {
 	}
 
 	/**
+	 * getting the employeepayroll data
+	 * 
 	 * @param name
 	 * @return Employee corresponding to name
 	 */
@@ -113,11 +123,13 @@ public class EmpPayrollServiceDB {
 	}
 
 	/**
+	 * method to check payroll is synced with databse
+	 * 
 	 * @param name
 	 * @return true if data is in sync
 	 */
 	public boolean checkEmployeePayrollInSyncWithDB(String name) {
-		List<EmployeePayrollData> checkList = (List<EmployeePayrollData>) ((EmpPayrollServiceDB) employeePayrollList).getEmployeePayrollData(name);
+		List<EmployeePayrollData> checkList = employeePayrollDBService.getEmployeePayrollData(name);
 		return checkList.get(0).equals(getEmployeePayrollData(name));
 
 	}

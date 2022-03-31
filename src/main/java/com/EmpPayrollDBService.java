@@ -10,12 +10,15 @@ import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 
-public class EmpPayrollService {
-	
-	private PreparedStatement employeePayrollDataStatement;
-	private static EmpPayrollService employeePayrollDBService;
+public class EmpPayrollDBService {
+	public enum StatementType {
+		PREPARED_STATEMENT, STATEMENT
+	}
 
-	EmpPayrollService() {
+	private PreparedStatement employeePayrollDataStatement;
+	private static EmpPayrollDBService employeePayrollDBService;
+
+	private EmpPayrollDBService() {
 
 	}
 
@@ -24,12 +27,17 @@ public class EmpPayrollService {
 	 * 
 	 * @return
 	 */
-	public static EmpPayrollService getInstance() {
+	public static EmpPayrollDBService getInstance() {
 		if (employeePayrollDBService == null)
-			employeePayrollDBService = new EmpPayrollService();
+			employeePayrollDBService = new EmpPayrollDBService();
 		return employeePayrollDBService;
 	}
-	
+
+	/**
+	 * Read the employee payroll data from the database
+	 * 
+	 * @return
+	 */
 	public List<EmployeePayrollData> readData() {
 		String sql = "SELECT * FROM employee_payroll";
 		List<EmployeePayrollData> employeePayrollList = new ArrayList<EmployeePayrollData>();
@@ -41,6 +49,20 @@ public class EmpPayrollService {
 			e.printStackTrace();
 		}
 		return employeePayrollList;
+	}
+
+	/**
+	 * To get the details of a particular employee from the DB using
+	 * PreparedStatement Interface
+	 */
+	private void preparedStatementForEmployeeData() {
+		try {
+			Connection connection = this.getConnection();
+			String sql = "Select * from employee_payroll WHERE name = ?";
+			employeePayrollDataStatement = connection.prepareStatement(sql);
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
 	}
 
 	/**
@@ -86,31 +108,23 @@ public class EmpPayrollService {
 		}
 		return employeePayrollList;
 	}
-	
-	/**
-	 * To get the details of a particular employee from the DB using
-	 * PreparedStatement Interfac
-	 */
-	private void preparedStatementForEmployeeData() {
-		try {
-			Connection connection = this.getConnection();
-			String sql = "Select * from employee_payroll WHERE name = ?";
-			employeePayrollDataStatement = connection.prepareStatement(sql);
-		} catch (SQLException e) {
-			e.printStackTrace();
-		}
-
-	}
 
 	/**
-	 * updating salary in the constructor
+	 * Update the salary in the DB using Statement Interface
 	 * 
 	 * @param name
 	 * @param salary
 	 * @return
 	 */
-	public int updateEmployeeData(String name, double salary) {
-		return this.updateDataUsingStatement(name, salary);
+	public int updateEmployeeData(String name, double salary, StatementType type) {
+		switch (type) {
+		case STATEMENT:
+			return this.updateDataUsingStatement(name, salary);
+		case PREPARED_STATEMENT:
+			return this.updateDataUsingPreparedStatement(name, salary);
+		default:
+			return 0;
+		}
 	}
 
 	/**
@@ -131,9 +145,28 @@ public class EmpPayrollService {
 		return 0;
 	}
 
+	/**
+	 * Update the salary in the DB using Prepared Statement
+	 * 
+	 * @param name
+	 * @param salary
+	 * @return
+	 */
+	private int updateDataUsingPreparedStatement(String name, double salary) {
+		String sql = "UPDATE employee_payroll SET salary = ? WHERE NAME = ?";
+		try (Connection connection = this.getConnection();) {
+			PreparedStatement preparedStatementUpdate = connection.prepareStatement(sql);
+			preparedStatementUpdate.setDouble(1, salary);
+			preparedStatementUpdate.setString(2, name);
+			return preparedStatementUpdate.executeUpdate();
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+		return 0;
+	}
 
 	/**
-	 * To create connection with the database
+	 * Creating connection with the database
 	 * 
 	 * @return
 	 * @throws SQLException
@@ -141,12 +174,11 @@ public class EmpPayrollService {
 	private Connection getConnection() throws SQLException {
 		String jdbcURL = "jdbc:mysql://localhost:3306/payroll_service?useSSL=false";
 		String userName = "root";
-		String password = "Nithya1234@";
+		String password = "123456";
 		Connection connection;
 		System.out.println("Connecting to database: " + jdbcURL);
 		connection = DriverManager.getConnection(jdbcURL, userName, password);
 		System.out.println("Connection successful: " + connection);
 		return connection;
 	}
-
 }
