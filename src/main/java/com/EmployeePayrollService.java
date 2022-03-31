@@ -2,6 +2,7 @@ package com;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Scanner;
 
 import com.EmpPayrollDBService.StatementType;
@@ -143,5 +144,17 @@ public class EmployeePayrollService {
 	public List<EmployeePayrollData> getEmployeesInDateRange(String date1, String date2) {
 		List<EmployeePayrollData> employeesInGivenDateRangeList = employeePayrollDBService.getEmployeesInGivenDateRangeDB(date1,date2);
 		return employeesInGivenDateRangeList;
+	}
+	
+	/**
+	 * read the Average Salary group ByGender using Hashmap
+	 * 
+	 * @param ioService
+	 * @return
+	 */
+	public Map<String, Double> readAverageSalaryByGender(IOService ioService) {
+		if (ioService.equals(IOService.DB_IO))
+			return employeePayrollDBService.getAverageSalaryByGender();
+		return null;
 	}
 }
