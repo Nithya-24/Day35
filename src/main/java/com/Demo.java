@@ -20,7 +20,7 @@ public class Demo {
 	public static void main(String[] args) {
 		// TODO Auto-generated method stub
 		
-		String jdbcUrl = "jdbc:mysql://localhost:3306/payroll_service";
+		String jdbcUrl = "jdbc:mysql://localhost:3306/payroll_service?useSSL=false";
 		String userName = "root";
 		String password = "Nithya1234@";
 		java.sql.Connection Connection;
@@ -42,7 +42,7 @@ public class Demo {
 		try {
 			System.out.println("connecting to the database:" + jdbcUrl);
 			Connection =  DriverManager.getConnection(jdbcUrl,userName,password);
-			System.out.println("connection is successful" +Connection);
+			System.out.println("connection is successful! " +Connection);
 		}catch (Exception e) {
 			e.printStackTrace();
 		}

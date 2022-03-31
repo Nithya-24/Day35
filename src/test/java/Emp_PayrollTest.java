@@ -41,7 +41,7 @@ public class Emp_PayrollTest {
 	public void givenEmployeePayrollInDB_WhenRetrieved_ShouldMatchEmployeeCount() {
 		EmployeePayrollService employeePayrollService = new EmployeePayrollService();
 		List<EmployeePayrollData> employeePayrollData = employeePayrollService.readData(IOService.DB_IO);
-		assertEquals(4, employeePayrollData.size());
+		assertEquals(3, employeePayrollData.size());
 	}
 
 	@Test
@@ -73,6 +73,23 @@ public class Emp_PayrollTest {
 		employeePayrollService.updateEmployeeSalary("Mark Zuckerberg", 3000000.00, StatementType.PREPARED_STATEMENT);
 		boolean result = employeePayrollService.checkEmployeePayrollInSyncWithDB("Mark Zuckerberg");
 		assertTrue(result);
+		System.out.println(employeePayrollData);
+	}
+	
+	@Test
+	/**
+	 * To test whether the count of the retrieved data who have joined in a
+	 * particular data range matches with the expected value
+	 * 
+	 * @throws EmployeePayrollException
+	 */
+	public void givenDateRangeForEmployee_WhenRetrievedUsingStatement_ShouldReturnProperData()
+			throws EmployeePayrollException {
+		EmployeePayrollService employeePayrollService = new EmployeePayrollService();
+		List<EmployeePayrollData> employeePayrollData = employeePayrollService.readData(IOService.DB_IO);
+		List<EmployeePayrollData> employeeDataInGivenDateRange = employeePayrollService
+				.getEmployeesInDateRange("2022-01-01", "2022-04-15");
+		assertEquals(3, employeeDataInGivenDateRange.size());
 		System.out.println(employeePayrollData);
 	}
 }
